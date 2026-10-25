@@ -1,0 +1,636 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text to Voice Generator</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #212027;
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+header {
+  background: linear-gradient(135deg, #172554, #4f46e5);
+  color: white;
+  text-align: center;
+  padding: 32px 15px;
+}
+
+header h1 {
+  font-size: clamp(25px, 5vw, 38px);
+  margin-bottom: 10px;
+}
+
+header p {
+  color: #e0e7ff;
+}
+
+.container {
+  max-width: 850px;
+  width: 94%;
+  margin: 25px auto;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 30px #0f172a12;
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  font-size: 14px;
+  margin: 18px 0 9px;
+}
+
+textarea, select {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: white;
+  font: inherit;
+  color: #1e293b;
+}
+
+textarea {
+  min-height: 175px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+textarea:focus, select:focus {
+  outline: 2px solid #818cf8;
+  border-color: #4f46e5;
+}
+
+.count {
+  margin-top: 8px;
+  text-align: right;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.range-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.range-title label {
+  margin-bottom: 10px;
+}
+
+.range-value {
+  color: #4f46e5;
+  font-weight: bold;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #4f46e5;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 23px;
+}
+
+.buttons button, .audio-box a {
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 15px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.buttons button:hover, .audio-box a:hover {
+  filter: brightness(.95);
+}
+
+.primary {
+  background: #4f46e5;
+  color: white;
+}
+
+.secondary {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.download {
+  background: #15803d;
+  color: white;
+}
+
+button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.status {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.status.error {
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+.audio-box {
+  display: none;
+  margin-top: 20px;
+}
+
+.audio-box audio {
+  width: 100%;
+  margin: 12px 0;
+}
+
+.audio-box a {
+  display: inline-block;
+  background: #15803d;
+  color: white;
+}
+
+.note {
+  margin-top: 16px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 17px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .buttons button {
+    flex: 1 1 40%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🎙 Text to Voice Generator</h1>
+  <p>Write text, listen to speech and download MP3.</p>
+</header>
+
+<main class="container">
+<section class="card">
+
+  <h2>Text to Speech</h2>
+  <p class="subtitle">
+    Text likho, language select karo aur voice suno ya MP3 download karo.
+  </p>
+
+  <label for="textInput">Your Text</label>
+  <textarea id="textInput" placeholder="Yahan apna text likho..."></textarea>
+
+  <div class="count">
+    <span id="charCount">0</span> characters
+  </div>
+
+  <div class="grid">
+    <div>
+      <label for="language">MP3 Language</label>
+      <select id="language">
+        <option value="hi">Hindi</option>
+        <option value="en">English</option>
+        <option value="en-US">English (US)</option>
+        <option value="en-GB">English (UK)</option>
+        <option value="bn">Bengali</option>
+        <option value="gu">Gujarati</option>
+        <option value="mr">Marathi</option>
+        <option value="ta">Tamil</option>
+        <option value="te">Telugu</option>
+        <option value="kn">Kannada</option>
+        <option value="ml">Malayalam</option>
+        <option value="pa">Punjabi</option>
+        <option value="ur">Urdu</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="it">Italian</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+        <option value="pt">Portuguese</option>
+        <option value="ru">Russian</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="voice">Browser Voice</label>
+      <select id="voice">
+        <option value="">Loading voices...</option>
+      </select>
+    </div>
+
+    <div>
+      <div class="range-title">
+        <label for="speed">Speech Speed</label>
+        <span class="range-value" id="speedValue">1.0×</span>
+      </div>
+      <input id="speed" type="range"
+        min="0.5" max="2" step="0.1" value="1">
+    </div>
+
+    <div>
+      <div class="range-title">
+        <label for="pitch">Voice Pitch</label>
+        <span class="range-value" id="pitchValue">1.0</span>
+      </div>
+      <input id="pitch" type="range"
+        min="0.5" max="2" step="0.1" value="1">
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button class="primary" id="speakBtn">▶ Speak</button>
+    <button class="secondary" id="pauseBtn">⏸ Pause</button>
+    <button class="secondary" id="resumeBtn">▶ Resume</button>
+    <button class="secondary" id="stopBtn">■ Stop</button>
+    <button class="secondary" id="clearBtn">✕ Clear Text</button>
+    <button class="download" id="downloadBtn">⬇ Download MP3</button>
+  </div>
+
+  <div class="status" id="status" role="status" aria-live="polite">
+    Ready. Enter your text to begin.
+  </div>
+
+  <div class="audio-box" id="audioBox">
+    <strong>Your Audio Preview</strong>
+    <audio id="audioPlayer" controls></audio>
+    <br>
+    <a id="downloadLink" href="#" download="my-voice.mp3">
+      ⬇ Download MP3 Again
+    </a>
+  </div>
+
+  <p class="note">
+    Speak button browser ki available voice use karta hai.
+    MP3 download ke liye internet aur local Python server zaroori hai.
+  </p>
+
+</section>
+</main>
+
+<footer>Free Text to Voice Generator</footer>
+
+<script>
+"use strict";
+
+const textInput = document.getElementById("textInput");
+const languageSelect = document.getElementById("language");
+const voiceSelect = document.getElementById("voice");
+const statusBox = document.getElementById("status");
+
+const speedInput = document.getElementById("speed");
+const pitchInput = document.getElementById("pitch");
+
+const speakBtn = document.getElementById("speakBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const resumeBtn = document.getElementById("resumeBtn");
+const stopBtn = document.getElementById("stopBtn");
+const clearBtn = document.getElementById("clearBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+
+const audioBox = document.getElementById("audioBox");
+const audioPlayer = document.getElementById("audioPlayer");
+const downloadLink = document.getElementById("downloadLink");
+
+let availableVoices = [];
+let currentAudioUrl = null;
+
+function showStatus(message, isError = false) {
+  statusBox.textContent = message;
+  statusBox.classList.toggle("error", isError);
+}
+
+function loadVoices() {
+  if (!("speechSynthesis" in window)) {
+    voiceSelect.innerHTML =
+      '<option value="">Browser voice unavailable</option>';
+    return;
+  }
+
+  availableVoices = speechSynthesis.getVoices();
+  const oldValue = voiceSelect.value;
+  voiceSelect.innerHTML = "";
+
+  if (!availableVoices.length) {
+    voiceSelect.innerHTML =
+      '<option value="">Default browser voice</option>';
+    return;
+  }
+
+  availableVoices.forEach((voice, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = `${voice.name} (${voice.lang})`;
+    voiceSelect.appendChild(option);
+  });
+
+  if (oldValue && [...voiceSelect.options].some(
+    option => option.value === oldValue
+  )) {
+    voiceSelect.value = oldValue;
+  }
+}
+
+if ("speechSynthesis" in window) {
+  loadVoices();
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+textInput.addEventListener("input", () => {
+  document.getElementById("charCount").textContent =
+    textInput.value.length;
+});
+
+speedInput.addEventListener("input", () => {
+  document.getElementById("speedValue").textContent =
+    Number(speedInput.value).toFixed(1) + "×";
+});
+
+pitchInput.addEventListener("input", () => {
+  document.getElementById("pitchValue").textContent =
+    Number(pitchInput.value).toFixed(1);
+});
+
+speakBtn.addEventListener("click", () => {
+  const text = textInput.value.trim();
+
+  if (!text) {
+    showStatus("Pehle text likho.", true);
+    textInput.focus();
+    return;
+  }
+
+  if (!("speechSynthesis" in window)) {
+    showStatus("Browser speech support nahi karta.", true);
+    return;
+  }
+
+  speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  const selectedVoice = availableVoices[Number(voiceSelect.value)];
+
+  if (selectedVoice) utterance.voice = selectedVoice;
+
+  utterance.rate = Number(speedInput.value);
+  utterance.pitch = Number(pitchInput.value);
+
+  utterance.onstart = () => showStatus("Speaking...");
+  utterance.onend = () => showStatus("Speech finished.");
+  utterance.onerror = event =>
+    showStatus("Speech error: " + event.error, true);
+
+  speechSynthesis.speak(utterance);
+});
+
+pauseBtn.addEventListener("click", () => {
+  if ("speechSynthesis" in window && speechSynthesis.speaking) {
+    speechSynthesis.pause();
+    showStatus("Speech paused.");
+  }
+});
+
+resumeBtn.addEventListener("click", () => {
+  if ("speechSynthesis" in window && speechSynthesis.paused) {
+    speechSynthesis.resume();
+    showStatus("Speech resumed.");
+  }
+});
+
+stopBtn.addEventListener("click", () => {
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  showStatus("Speech stopped.");
+});
+
+clearBtn.addEventListener("click", () => {
+  textInput.value = "";
+  document.getElementById("charCount").textContent = "0";
+  showStatus("Text cleared.");
+  textInput.focus();
+});
+
+function splitText(text, maxLength = 180) {
+  const words = text.split(/\s+/);
+  const parts = [];
+  let part = "";
+
+  for (const word of words) {
+    if ((part + " " + word).trim().length > maxLength && part) {
+      parts.push(part);
+      part = word;
+    } else {
+      part = (part + " " + word).trim();
+    }
+  }
+
+  if (part) parts.push(part);
+  return parts;
+}
+
+async function getTtsChunk(text, language) {
+  const voiceMap = {
+    "en": "en-US-AriaNeural",
+    "hi": "hi-IN-SwaraNeural",
+    "en-US": "en-US-AriaNeural",
+    "en-GB": "en-GB-SoniaNeural",
+    "bn": "bn-IN-TanishaaNeural",
+    "gu": "gu-IN-DhwaniNeural",
+    "mr": "mr-IN-AarohiNeural",
+    "ta": "ta-IN-PallaviNeural",
+    "te": "te-IN-ShrutiNeural",
+    "kn": "kn-IN-SapnaNeural",
+    "ml": "ml-IN-SobhanaNeural",
+    "pa": "pa-IN-VaaniNeural",
+    "ur": "ur-PK-UzmaNeural",
+    "es": "es-ES-ElviraNeural",
+    "fr": "fr-FR-DeniseNeural",
+    "de": "de-DE-KatjaNeural",
+    "it": "it-IT-ElsaNeural",
+    "ja": "ja-JP-NanamiNeural",
+    "ko": "ko-KR-SunHiNeural",
+    "pt": "pt-BR-FranciscaNeural",
+    "ru": "ru-RU-SvetlanaNeural"
+  };
+
+  const speed = Number(speedInput.value);
+  const rateNumber = Math.round((speed - 1) * 100);
+  const rate = (rateNumber >= 0 ? "+" : "") + rateNumber + "%";
+
+  const pitchNumber = Math.round(
+    (Number(pitchInput.value) - 1) * 50
+  );
+  const pitch = (pitchNumber >= 0 ? "+" : "") +
+    pitchNumber + "Hz";
+
+  const response = await fetch("/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      text: text,
+      voice: voiceMap[language] || "hi-IN-SwaraNeural",
+      rate: rate,
+      pitch: pitch
+    })
+  });
+
+  if (!response.ok) {
+    let detail = "HTTP " + response.status;
+
+    try {
+      const data = await response.json();
+      if (data.error) detail = data.error;
+    } catch (error) {}
+
+    throw new Error(detail);
+  }
+
+  const blob = await response.blob();
+
+  if (!blob.size) {
+    throw new Error("Server ne empty audio file bheji.");
+  }
+
+  return blob;
+}
+
+downloadBtn.addEventListener("click", async () => {
+  const text = textInput.value.trim();
+
+  if (!text) {
+    showStatus("MP3 banane se pehle text likho.", true);
+    textInput.focus();
+    return;
+  }
+
+  if (downloadBtn.disabled) return;
+
+  downloadBtn.disabled = true;
+  downloadBtn.textContent = "⏳ Creating MP3...";
+  audioBox.style.display = "none";
+
+  try {
+    const parts = splitText(text);
+    const audioBlobs = [];
+
+    for (let i = 0; i < parts.length; i++) {
+      showStatus(
+        `MP3 ban raha hai: part ${i + 1} of ${parts.length}`
+      );
+
+      const blob = await getTtsChunk(
+        parts[i],
+        languageSelect.value
+      );
+
+      audioBlobs.push(blob);
+    }
+
+    // Audio parts ko ek MP3 file mein jodna
+    const mp3Blob = new Blob(audioBlobs, {
+      type: "audio/mpeg"
+    });
+
+    if (currentAudioUrl) {
+      URL.revokeObjectURL(currentAudioUrl);
+    }
+
+    currentAudioUrl = URL.createObjectURL(mp3Blob);
+
+    audioPlayer.src = currentAudioUrl;
+    downloadLink.href = currentAudioUrl;
+    downloadLink.download = "my-voice.mp3";
+
+    audioBox.style.display = "block";
+
+    // Automatic download
+    const link = document.createElement("a");
+    link.href = currentAudioUrl;
+    link.download = "my-voice.mp3";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    showStatus("MP3 ready! Download folder check karo.");
+
+  } catch (error) {
+    console.error(error);
+
+    showStatus(
+      "MP3 nahi bana: " + error.message +
+      ". Internet aur server.py check karo.",
+      true
+    );
+  } finally {
+    downloadBtn.disabled = false;
+    downloadBtn.textContent = "⬇ Download MP3";
+  }
+});
+</script>
+
+</body>
+</html>
