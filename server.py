@@ -5,6 +5,26 @@ import io
 import os
 
 app = Flask(__name__)
+@app.route("/robots.txt")
+def robots():
+    return (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Sitemap: https://text-to-voice-app-1.onrender.com/sitemap.xml\n",
+        200,
+        {"Content-Type": "text/plain; charset=utf-8"}
+    )
+
+
+@app.route("/sitemap.xml")
+def sitemap():
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://text-to-voice-app-1.onrender.com/</loc>
+  </url>
+</urlset>"""
+    return xml, 200, {"Content-Type": "application/xml; charset=utf-8"}
 
 @app.route("/")
 def home():
